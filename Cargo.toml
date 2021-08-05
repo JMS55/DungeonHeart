@@ -1,0 +1,9 @@
+[package]
+name = "bevy_dungeon"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+bevy = "0.5"
+dyn-clone = "1.0"
+once_cell = "1.8"
