@@ -73,11 +73,16 @@ pub fn determine_turn_group(mut turn_group: ResMut<TurnGroup>, mut actors: Query
     }
 }
 
-/// Asks actors in current turn group that are ready to act for an action
+/// If action stack is empty
+/// Asks actors in current turn group for an action if they are ready to act
 /// Stops on the first action being given
 /// If the current turn group is Players, keep asking the first actor each tick until they give one
 /// If the current turn group isn't Players, ask each actor 3 times a tick
 pub fn decide_next_action(world: &mut World) {
+    if !world.get_resource::<ActionStack>().unwrap().is_empty() {
+        return;
+    }
+
     if world.get_resource::<TurnGroup>().unwrap() == &TurnGroup::Player {
         let actor_entity = world
             .query::<(&Actor, Entity)>()
