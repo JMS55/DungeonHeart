@@ -1,7 +1,9 @@
 use crate::actions::{Action, ActionStatus};
 use crate::components::GridPosition;
-use crate::immutable_world::ImmutableWorld;
+use crate::world::{ImmutableWorld, WorldExt};
+use bevy::core::Time;
 use bevy::prelude::{Entity, Transform, World};
+use std::time::Duration;
 
 pub struct MoveAction {
     pub entity: Entity,
@@ -50,24 +52,67 @@ impl Action for MoveAction {
                 return ActionStatus::Finished;
             }
         }
-        world
-            .get_mut::<Transform>(self.entity)
-            .unwrap()
-            .translation
-            .x = (intended_position.x * 32) as f32;
-        world
-            .get_mut::<Transform>(self.entity)
-            .unwrap()
-            .translation
-            .y = (intended_position.y * 32) as f32;
+
         *world.get_mut::<GridPosition>(self.entity).unwrap() = intended_position;
+        world.add_action(MoveAnimationAction::new(self.entity, self.direction));
         ActionStatus::Finished
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum Direction {
     Up,
     Down,
     Left,
     Right,
+}
+
+struct MoveAnimationAction {
+    entity: Entity,
+    direction: Direction,
+    duration: Duration,
+    pixels_left: f32,
+}
+
+impl MoveAnimationAction {
+    fn new(entity: Entity, direction: Direction) -> Self {
+        Self {
+            entity,
+            direction,
+            duration: Duration::from_millis(80),
+            pixels_left: 32.0,
+        }
+    }
+}
+
+impl Action for MoveAnimationAction {
+    fn can_perform(&self, _: &mut ImmutableWorld) -> bool {
+        true
+    }
+
+    fn perform(&mut self, world: &mut World) -> ActionStatus {
+        let dt = world.get_resource::<Time>().unwrap().delta().as_secs_f32();
+        let duration = self.duration.as_secs_f32();
+        let pixels_to_move = ((dt / duration) * 32.0).min(self.pixels_left);
+
+        // TODO: Use "&mut transform.into_inner().translation" from bevy 0.6
+        let mut transform = match world.get_mut::<Transform>(self.entity) {
+            Some(t) => t,
+            None => return ActionStatus::Finished,
+        };
+        let translation = &mut transform.translation;
+        match self.direction {
+            Direction::Up => translation.y += pixels_to_move,
+            Direction::Down => translation.y -= pixels_to_move,
+            Direction::Left => translation.x -= pixels_to_move,
+            Direction::Right => translation.x += pixels_to_move,
+        }
+
+        self.pixels_left -= pixels_to_move;
+        if self.pixels_left == 0.0 {
+            ActionStatus::Finished
+        } else {
+            ActionStatus::Unfinished
+        }
+    }
 }

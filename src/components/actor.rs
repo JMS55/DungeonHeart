@@ -1,5 +1,5 @@
 use crate::actions::{Action, ActionStack};
-use crate::immutable_world::ImmutableWorld;
+use crate::world::ImmutableWorld;
 use bevy::prelude::{Entity, Query, ResMut, World};
 use dyn_clone::{clone_trait_object, DynClone};
 

@@ -1,3 +1,4 @@
+use crate::actions::{Action, ActionStack};
 use bevy::ecs::prelude::QueryState;
 use bevy::ecs::query::{ReadOnlyFetch, WorldQuery};
 use bevy::prelude::World;
@@ -26,5 +27,17 @@ impl Deref for ImmutableWorld<'_> {
 
     fn deref(&self) -> &World {
         &self.world
+    }
+}
+
+pub trait WorldExt {
+    fn add_action<T: Action + 'static>(&mut self, action: T);
+}
+
+impl WorldExt for World {
+    fn add_action<T: Action + 'static>(&mut self, action: T) {
+        self.get_resource_mut::<ActionStack>()
+            .unwrap()
+            .add(Box::new(action));
     }
 }

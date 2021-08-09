@@ -1,5 +1,5 @@
 use crate::actions::{Action, ActionStatus};
-use crate::immutable_world::ImmutableWorld;
+use crate::world::ImmutableWorld;
 use bevy::prelude::{Entity, World};
 
 pub struct PrintEntityAction {

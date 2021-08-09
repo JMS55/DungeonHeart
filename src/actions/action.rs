@@ -1,22 +1,20 @@
-use crate::immutable_world::ImmutableWorld;
+use crate::world::ImmutableWorld;
 use bevy::prelude::World;
 use std::time::{Duration, Instant};
 
-pub struct ActionStack {
-    stack: Vec<Box<dyn Action>>,
-}
+pub struct ActionStack(Vec<Box<dyn Action>>);
 
 impl ActionStack {
     pub fn new() -> Self {
-        Self { stack: Vec::new() }
+        Self(Vec::new())
     }
 
     pub fn is_empty(&self) -> bool {
-        self.stack.is_empty()
+        self.0.is_empty()
     }
 
     pub fn add(&mut self, action: Box<dyn Action>) {
-        self.stack.push(action);
+        self.0.push(action);
     }
 
     pub fn add_in_exec_order<I>(&mut self, actions: I)
@@ -66,14 +64,14 @@ pub fn perform_next_action(world: &mut World) {
     let start = Instant::now();
     loop {
         let mut action_stack = world.get_resource_mut::<ActionStack>().unwrap();
-        match action_stack.stack.pop() {
+        match action_stack.0.pop() {
             Some(mut action) => {
-                let action_index = action_stack.stack.len();
+                let action_index = action_stack.0.len();
                 let action_status = action.perform(world);
 
                 if action_status == ActionStatus::Unfinished {
                     let mut action_stack = world.get_resource_mut::<ActionStack>().unwrap();
-                    action_stack.stack.insert(action_index, action);
+                    action_stack.0.insert(action_index, action);
                     break;
                 }
 

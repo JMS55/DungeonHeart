@@ -1,20 +1,21 @@
+use crate::actions::RegenerateDungeonAction;
+use crate::world::WorldExt;
 use actions::{perform_next_action, ActionStack};
 use bevy::prelude::{
-    App, AssetServer, Assets, Commands, Handle, IntoExclusiveSystem, IntoSystem,
-    OrthographicCameraBundle, ParallelSystemDescriptorCoercion, Res, ResMut,
+    App, AssetServer, Assets, BuildWorldChildren, ClearColor, Color, IntoExclusiveSystem,
+    IntoSystem, OrthographicCameraBundle, World,
 };
 use bevy::sprite::ColorMaterial;
 use bevy::window::WindowDescriptor;
 use bevy::DefaultPlugins;
-use bundles::{Player, SkeletonScout};
+use bundles::{Player, SkeletonScout, MATERIAL_MAP};
 use components::{decide_next_action, determine_turn_group, TurnGroup};
-use once_cell::sync::OnceCell;
 use std::collections::HashMap;
 
 mod actions;
 mod bundles;
 mod components;
-mod immutable_world;
+mod world;
 
 fn main() {
     App::build()
@@ -23,33 +24,46 @@ fn main() {
             height: 480.0,
             ..Default::default()
         })
+        .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.05)))
         .insert_resource(ActionStack::new())
-        .insert_resource(TurnGroup::Player)
+        .insert_resource(TurnGroup::Neutral)
         .add_plugins(DefaultPlugins)
-        .add_startup_system(init_material_map.system().label("init_material_map"))
-        .add_startup_system(init_game.system().after("init_material_map"))
+        .add_startup_system(init_game.exclusive_system())
         .add_system(determine_turn_group.system())
         .add_system(decide_next_action.exclusive_system())
         .add_system(perform_next_action.exclusive_system())
         .run();
 }
 
-static MATERIAL_MAP: OnceCell<HashMap<&'static str, Handle<ColorMaterial>>> = OnceCell::new();
-
-fn init_material_map(assets: Res<AssetServer>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn init_game(world: &mut World) {
+    let assets = world.get_resource::<AssetServer>().unwrap();
+    #[cfg(debug_assertions)]
+    assets.watch_for_changes().unwrap();
+    let mut materials =
+        unsafe { world.get_resource_unchecked_mut::<Assets<ColorMaterial>>() }.unwrap();
     let mut material_map = HashMap::new();
-    for material in ["soul_spectre.png", "skeleton_scout.png"] {
+    // TODO: Autoload entire folder
+    for material in [
+        "floor.png",
+        "skeleton_scout.png",
+        "soul_spectre.png",
+        "wall_mossy.png",
+        "wall.png",
+    ] {
         material_map.insert(material, materials.add(assets.load(material).into()));
     }
-    MATERIAL_MAP.set(material_map).unwrap();
-}
+    MATERIAL_MAP.map.set(material_map).unwrap();
 
-fn init_game(mut cmd: Commands) {
-    cmd.spawn_bundle(OrthographicCameraBundle::new_2d());
+    world.spawn().insert_bundle(SkeletonScout::new(0, 0));
+    world.spawn().insert_bundle(SkeletonScout::new(1, 0));
+    world.spawn().insert_bundle(SkeletonScout::new(0, 1));
+    world.spawn().insert_bundle(SkeletonScout::new(1, 1));
+    world.spawn().insert_bundle(Player::new(2, 2));
+    // .with_children(|player| {
+    //     player.spawn_bundle(OrthographicCameraBundle::new_2d());
+    // });
 
-    cmd.spawn_bundle(SkeletonScout::new(0, 0));
-    cmd.spawn_bundle(SkeletonScout::new(1, 0));
-    cmd.spawn_bundle(SkeletonScout::new(0, 1));
-    cmd.spawn_bundle(SkeletonScout::new(1, 1));
-    cmd.spawn_bundle(Player::new(2, 2));
+    world
+        .spawn()
+        .insert_bundle(OrthographicCameraBundle::new_2d());
 }
