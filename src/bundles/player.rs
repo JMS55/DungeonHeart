@@ -1,6 +1,6 @@
 use crate::actions::{Action, Direction, MoveAction};
 use crate::bundles::SpriteBundleExt;
-use crate::components::{Actor, Damageable, GridPosition, TurnGroup};
+use crate::components::{Actor, Damageable, GridPosition, KeepBetweenFloors, TurnGroup};
 use crate::world::ImmutableWorld;
 use bevy::input::Input;
 use bevy::prelude::{Bundle, Entity, KeyCode, SpriteBundle};
@@ -12,6 +12,7 @@ pub struct Player {
     actor: Actor,
     #[bundle]
     sprite: SpriteBundle,
+    kbf: KeepBetweenFloors,
 }
 
 impl Player {
@@ -21,6 +22,7 @@ impl Player {
             damageable: Damageable::new(),
             actor: Actor::new(player_brain, TurnGroup::Player),
             sprite: SpriteBundle::new("soul_spectre.png", x, y),
+            kbf: KeepBetweenFloors,
         }
     }
 }

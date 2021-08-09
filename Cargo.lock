@@ -315,6 +315,7 @@ dependencies = [
  "bevy",
  "dyn-clone",
  "once_cell",
+ "rand",
 ]
 
 [[package]]

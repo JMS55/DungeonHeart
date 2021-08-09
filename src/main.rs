@@ -1,4 +1,5 @@
 use crate::actions::RegenerateDungeonAction;
+use crate::components::KeepBetweenFloors;
 use crate::world::WorldExt;
 use actions::{perform_next_action, ActionStack};
 use bevy::prelude::{
@@ -54,16 +55,35 @@ fn init_game(world: &mut World) {
     }
     MATERIAL_MAP.map.set(material_map).unwrap();
 
-    world.spawn().insert_bundle(SkeletonScout::new(0, 0));
-    world.spawn().insert_bundle(SkeletonScout::new(1, 0));
-    world.spawn().insert_bundle(SkeletonScout::new(0, 1));
-    world.spawn().insert_bundle(SkeletonScout::new(1, 1));
-    world.spawn().insert_bundle(Player::new(2, 2));
-    // .with_children(|player| {
-    //     player.spawn_bundle(OrthographicCameraBundle::new_2d());
-    // });
-
     world
         .spawn()
-        .insert_bundle(OrthographicCameraBundle::new_2d());
+        .insert_bundle(SkeletonScout::new(0, 0))
+        .insert(KeepBetweenFloors);
+    world
+        .spawn()
+        .insert_bundle(SkeletonScout::new(1, 0))
+        .insert(KeepBetweenFloors);
+    world
+        .spawn()
+        .insert_bundle(SkeletonScout::new(0, 1))
+        .insert(KeepBetweenFloors);
+    world
+        .spawn()
+        .insert_bundle(SkeletonScout::new(1, 1))
+        .insert(KeepBetweenFloors);
+    world
+        .spawn()
+        .insert_bundle(Player::new(2, 2))
+        .with_children(|player| {
+            player
+                .spawn_bundle(OrthographicCameraBundle::new_2d())
+                .insert(KeepBetweenFloors);
+        });
+
+    // world
+    //     .spawn()
+    //     .insert_bundle(OrthographicCameraBundle::new_2d())
+    //     .insert(KeepBetweenFloors);
+
+    world.add_action(RegenerateDungeonAction::new());
 }
