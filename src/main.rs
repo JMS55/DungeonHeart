@@ -4,7 +4,7 @@ use crate::world::WorldExt;
 use actions::{perform_next_action, ActionStack};
 use bevy::prelude::{
     App, AssetServer, Assets, BuildWorldChildren, ClearColor, Color, IntoExclusiveSystem,
-    IntoSystem, OrthographicCameraBundle, World,
+    IntoSystem, OrthographicCameraBundle, Transform, World,
 };
 use bevy::sprite::ColorMaterial;
 use bevy::window::WindowDescriptor;
@@ -75,15 +75,10 @@ fn init_game(world: &mut World) {
         .spawn()
         .insert_bundle(Player::new(2, 2))
         .with_children(|player| {
-            player
-                .spawn_bundle(OrthographicCameraBundle::new_2d())
-                .insert(KeepBetweenFloors);
+            let mut camera = player.spawn_bundle(OrthographicCameraBundle::new_2d());
+            camera.insert(KeepBetweenFloors);
+            camera.get_mut::<Transform>().unwrap().translation.z -= 1.0; // TODO: See if this is needed to make the floor render in future bevy releases
         });
-
-    // world
-    //     .spawn()
-    //     .insert_bundle(OrthographicCameraBundle::new_2d())
-    //     .insert(KeepBetweenFloors);
 
     world.add_action(RegenerateDungeonAction::new());
 }
