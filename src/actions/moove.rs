@@ -79,7 +79,7 @@ impl MoveAnimationAction {
         Self {
             entity,
             direction,
-            duration: Duration::from_millis(80),
+            duration: Duration::from_millis(40),
             pixels_left: 32.0,
         }
     }
