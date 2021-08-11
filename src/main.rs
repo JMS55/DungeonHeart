@@ -45,6 +45,7 @@ fn init_game(world: &mut World) {
     let mut material_map = HashMap::new();
     // TODO: Autoload entire folder
     for material in [
+        "floor_alt.png",
         "floor.png",
         "skeleton_scout.png",
         "soul_spectre.png",
@@ -77,7 +78,7 @@ fn init_game(world: &mut World) {
         .with_children(|player| {
             let mut camera = player.spawn_bundle(OrthographicCameraBundle::new_2d());
             camera.insert(KeepBetweenFloors);
-            camera.get_mut::<Transform>().unwrap().translation.z -= 1.0; // TODO: See if this is needed to make the floor render in future bevy releases
+            camera.get_mut::<Transform>().unwrap().translation.z -= 1.0;
         });
 
     world.add_action(RegenerateDungeonAction::new());
