@@ -2,7 +2,8 @@ use crate::actions::{Action, ActionStatus};
 use crate::components::GridPosition;
 use crate::world::{ImmutableWorld, WorldExt};
 use bevy::core::Time;
-use bevy::prelude::{Entity, Transform, World};
+use bevy::math::Rect;
+use bevy::prelude::{Entity, GlobalTransform, Transform, World};
 use std::time::Duration;
 
 pub struct MoveAction {
@@ -71,7 +72,7 @@ struct MoveAnimationAction {
     entity: Entity,
     direction: Direction,
     duration: Duration,
-    pixels_left: f32,
+    pixels_remaining: f32,
 }
 
 impl MoveAnimationAction {
@@ -80,7 +81,7 @@ impl MoveAnimationAction {
             entity,
             direction,
             duration: Duration::from_millis(40),
-            pixels_left: 32.0,
+            pixels_remaining: 32.0,
         }
     }
 }
@@ -90,29 +91,63 @@ impl Action for MoveAnimationAction {
         true
     }
 
+    // TODO: Use "&/&mut transform.into_inner().translation" from bevy 0.6
     fn perform(&mut self, world: &mut World) -> ActionStatus {
-        let dt = world.get_resource::<Time>().unwrap().delta().as_secs_f32();
-        let duration = self.duration.as_secs_f32();
-        let pixels_to_move = ((dt / duration) * 32.0).min(self.pixels_left);
-
-        // TODO: Use "&mut transform.into_inner().translation" from bevy 0.6
-        let mut transform = match world.get_mut::<Transform>(self.entity) {
+        let transform = match world.get::<GlobalTransform>(self.entity) {
             Some(t) => t,
             None => return ActionStatus::Finished,
         };
-        let translation = &mut transform.translation;
+        let translation = &transform.translation;
+        let mut animation_rect = Rect {
+            left: translation.x - 16.0,
+            right: translation.x + 16.0,
+            top: translation.y + 16.0,
+            bottom: translation.y - 16.0,
+        };
         match self.direction {
-            Direction::Up => translation.y += pixels_to_move,
-            Direction::Down => translation.y -= pixels_to_move,
-            Direction::Left => translation.x -= pixels_to_move,
-            Direction::Right => translation.x += pixels_to_move,
+            Direction::Up => animation_rect.top += self.pixels_remaining,
+            Direction::Down => animation_rect.bottom -= self.pixels_remaining,
+            Direction::Left => animation_rect.left -= self.pixels_remaining,
+            Direction::Right => animation_rect.right += self.pixels_remaining,
         }
 
-        self.pixels_left -= pixels_to_move;
-        if self.pixels_left == 0.0 {
-            ActionStatus::Finished
+        if world.is_rect_visible(animation_rect) {
+            let dt = world.get_resource::<Time>().unwrap().delta().as_secs_f32();
+            let duration = self.duration.as_secs_f32();
+            let pixels_to_move = ((dt / duration) * 32.0).min(self.pixels_remaining);
+
+            let mut transform = match world.get_mut::<Transform>(self.entity) {
+                Some(t) => t,
+                None => return ActionStatus::Finished,
+            };
+            let translation = &mut transform.translation;
+            match self.direction {
+                Direction::Up => translation.y += pixels_to_move,
+                Direction::Down => translation.y -= pixels_to_move,
+                Direction::Left => translation.x -= pixels_to_move,
+                Direction::Right => translation.x += pixels_to_move,
+            }
+
+            self.pixels_remaining -= pixels_to_move;
+            if self.pixels_remaining == 0.0 {
+                ActionStatus::Finished
+            } else {
+                ActionStatus::Unfinished
+            }
         } else {
-            ActionStatus::Unfinished
+            let mut transform = match world.get_mut::<Transform>(self.entity) {
+                Some(t) => t,
+                None => return ActionStatus::Finished,
+            };
+            let translation = &mut transform.translation;
+            match self.direction {
+                Direction::Up => translation.y += self.pixels_remaining,
+                Direction::Down => translation.y -= self.pixels_remaining,
+                Direction::Left => translation.x -= self.pixels_remaining,
+                Direction::Right => translation.x += self.pixels_remaining,
+            }
+
+            ActionStatus::Finished
         }
     }
 }
