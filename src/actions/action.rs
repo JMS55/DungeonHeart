@@ -17,7 +17,7 @@ impl ActionStack {
         self.0.push(action);
     }
 
-    pub fn add_in_exec_order<I>(&mut self, actions: I)
+    pub fn add_sequence<I>(&mut self, actions: I)
     where
         I: IntoIterator<Item = Box<dyn Action>>,
         <I as IntoIterator>::IntoIter: DoubleEndedIterator,
