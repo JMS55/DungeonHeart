@@ -22,7 +22,7 @@ impl Actor {
 clone_trait_object!(Brain);
 pub trait Brain: DynClone + Send + Sync {
     fn decide_action(
-        &self,
+        &mut self,
         this_entity: Entity,
         world: &mut ImmutableWorld,
     ) -> Option<Box<dyn Action>>;
@@ -33,7 +33,7 @@ where
     F: (Fn(Entity, &mut ImmutableWorld) -> Option<Box<dyn Action>>) + DynClone + Send + Sync,
 {
     fn decide_action(
-        &self,
+        &mut self,
         this_entity: Entity,
         world: &mut ImmutableWorld,
     ) -> Option<Box<dyn Action>> {
@@ -91,8 +91,10 @@ pub fn decide_next_action(world: &mut World) {
             .map(|(_, actor_entity)| actor_entity)
             .next();
         if let Some(actor_entity) = actor_entity {
-            let brain_clone = world.get::<Actor>(actor_entity).unwrap().brain.clone();
+            let mut brain_clone = world.get::<Actor>(actor_entity).unwrap().brain.clone();
             let action = brain_clone.decide_action(actor_entity, &mut ImmutableWorld::new(world));
+            world.get_mut::<Actor>(actor_entity).unwrap().brain = brain_clone;
+
             if let Some(action) = action {
                 world.get_mut::<Actor>(actor_entity).unwrap().ready_to_act = false;
                 world.get_resource_mut::<ActionStack>().unwrap().add(action);
@@ -107,9 +109,11 @@ pub fn decide_next_action(world: &mut World) {
             .collect::<Vec<_>>();
         for decision_attempt in 1..=3 {
             for actor_entity in actor_entities.iter().copied() {
-                let brain_clone = world.get::<Actor>(actor_entity).unwrap().brain.clone();
+                let mut brain_clone = world.get::<Actor>(actor_entity).unwrap().brain.clone();
                 let action =
                     brain_clone.decide_action(actor_entity, &mut ImmutableWorld::new(world));
+                world.get_mut::<Actor>(actor_entity).unwrap().brain = brain_clone;
+
                 if let Some(action) = action {
                     world.get_mut::<Actor>(actor_entity).unwrap().ready_to_act = false;
                     world.get_resource_mut::<ActionStack>().unwrap().add(action);
