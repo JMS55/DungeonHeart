@@ -3,8 +3,9 @@ use crate::components::KeepBetweenFloors;
 use crate::world::WorldExt;
 use actions::{perform_next_action, ActionStack};
 use bevy::prelude::{
-    App, AssetServer, Assets, BuildWorldChildren, ClearColor, Color, IntoExclusiveSystem,
-    IntoSystem, OrthographicCameraBundle, Transform, World,
+    App, AssetServer, Assets, BuildWorldChildren, ClearColor, Color,
+    ExclusiveSystemDescriptorCoercion, IntoExclusiveSystem, IntoSystem, OrthographicCameraBundle,
+    Transform, World,
 };
 use bevy::sprite::ColorMaterial;
 use bevy::window::WindowDescriptor;
@@ -31,8 +32,8 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_startup_system(init_game.exclusive_system())
         .add_system(determine_turn_group.system())
-        .add_system(decide_next_action.exclusive_system())
-        .add_system(perform_next_action.exclusive_system())
+        .add_system(decide_next_action.exclusive_system().at_end().label("x"))
+        .add_system(perform_next_action.exclusive_system().at_end().after("x"))
         .run();
 }
 
