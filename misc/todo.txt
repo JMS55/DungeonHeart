@@ -1,0 +1,8 @@
+Add diagonal movement
+
+Cleanup main.rs
+Cleanup moove.rs
+Cleanup RegenerateDungeonAction
+    Make sure no rooms are inaccessible
+    Cleaner code
+    Spawn entities in batches

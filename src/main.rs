@@ -50,8 +50,8 @@ fn init_game(world: &mut World) {
         "floor.png",
         "skeleton_scout.png",
         "soul_spectre.png",
-        "wall_mossy.png",
-        "wall.png",
+        "wall1.png",
+        "wall2.png",
     ] {
         material_map.insert(material, materials.add(assets.load(material).into()));
     }

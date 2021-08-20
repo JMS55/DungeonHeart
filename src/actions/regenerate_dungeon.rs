@@ -157,10 +157,18 @@ impl RegenerateDungeonAction {
             }
         }
 
-        for position in self.wall_positions.difference(&self.floor_positions) {
+        self.wall_positions = self
+            .wall_positions
+            .difference(&self.floor_positions)
+            .copied()
+            .collect();
+        for position in &self.wall_positions {
+            let variant = self
+                .wall_positions
+                .contains(&(*position - IVec2::new(0, 1)));
             world
                 .spawn()
-                .insert_bundle(Wall::new(position.x, position.y));
+                .insert_bundle(Wall::new(position.x, position.y, !variant));
         }
     }
 

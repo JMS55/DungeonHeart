@@ -1,0 +1,226 @@
+Mechanics ideas:
+
+Gear - Have some kind of equip slot system
+    Headgear, upper body, lower body, shoes, several acessory/weapon slots
+
+Each enemy has to be different
+    Not just in how they attack you, but also in how you attack them
+        Weapons need tradeoffs, cooldown times, limited charges, etc
+
+Roguelikes are fun when you have to make decisions
+    Risks - "Do I take the risk that I can do enough damage?"
+            "Do I take the risk that this unknown effect/item is both positive and useful rn?"
+            "Can I be greedy in the short term for something that can help me in the long term, or vice versa?"
+
+Structured events are fun
+    Shops - Slay the spire, PMD, Isacc, Gungeon
+    Slay the spire quesiton marks
+
+Resource mangement and crafting
+    Alchemy - consistent source of potions
+    Gear crafting
+    Weapon upgrades
+    Scroll and other magic item crafting
+        Perhaps bad to have the player make Entads, limit to shops/loot?
+
+    Monster parts are hard to manage - Don't love unique materials
+        Could give each material a general category, and perhaps material-specific buffs like tinkers, but that's _too_ far into crafting imo
+        Souls? Tie into attributes?
+
+Quests - Meet NPCs on certain floors, fufill quest and deliver result to someone else
+    Rewards - gear, materials?, xp?
+
+Level up and numbers go up is fun
+    So is gear acquisition, you want to feel powerful, and getting far into a run = high numbers
+    Make sure number scale is big, 1-10 hp is hard to do, 10-100 is easier
+
+Traps
+    Hard to give players - Roguelikes are about moving around
+        Would need some sort of longer action you need to buy time for without moving
+    Can feel unfair
+    Leave these out for now, would have to be a later addition when the rest is more solid
+
+Inventory mangement
+    What to do about old loot? old materials?
+    Too many consumables?
+
+Rooms - Need to be interesting, not just endless empty rectangles in search of the stairs
+    Extra loot
+    Optional harder enemies
+    NPCs
+    Different enviorments that can be used for combat
+
+Run variety
+    Needs to be different each run
+    But needs to not be entirely random - player needs some control
+    Best to present options somehow, but random options
+    Needs not just run-to-run variety, but unlocks over the course of many runs
+    Extra randomizers ala STS dailies or isacc challenges
+
+    Variations of each enemy:
+        SkeletonScout
+        SkeletonScoutOfEctoplasm (slightly transparent)
+        SkeletonScoutOfBlight
+
+Bosses
+    Maybe slightly different variations, like in hades
+
+-------------------------
+
+Theme planning:
+
+What drives the player deeper in the dungeon?
+    I like the idea of escape - You're _____ and _____ is taking over your life
+    You feel deeper in the dungeon to escape
+    Mechanically, staying on a floor too long lets them start to "catch up", where they spawn en-mass keckleon style
+What is the ultimate end goal?
+    Reach the bottom of the dungeon - Not an escape? You always die in the end?
+        But how far you got could be an indicator of score?
+        Dislike this idea, winning should be a high moment, not a low just because of story
+
+Different charachters, all going deeper into the dungeon for different reasons (mechnically and story wise)
+    One is strength driven, needs to go deeper to get stronger
+    One is safety driven, needs to go deeper to escape
+        Staying on a floor too long spawns a progressive horde of special enemies
+        Presents both oppurunity - more Exp, special items? But also lots of risk of death
+    One feels lost, needs to go deeper in hopes of finding purpose
+    One is a native monster of the dungeon, and is driven by curiosity
+
+Name of the game is "Dungeon Heart"
+    Rumours of a hold/sanctuary/bastion at the bottom of the dungeon that contains all that you seek
+    Maybe play into the ambiguity? Different NPCs and charachters call it different things / rumours
+    Need to get to the "heart" of the dungeon
+
+Mechanics:
+    Game is about escape, trying to flee life, desperation for something different, hoping for a respite (from life / the floors of monsters)
+    How to make mechanics out of this?
+
+-------------------------
+
+Combat planning:
+
+Emotion based combat - Emotions are stats, but also pokemon types
+Stats/skills for different emotions
+Different charachters have different emotion prefrecens and such by default
+NPCs have dialogue that changes your emotions
+    Mechanically could be like shops or buffs or stuff
+    Themtically is dialogue and story that can be skipped through
+Level ups let you choose emotions to increase
+    Thematically, represents chrachter development
+Gear is tied into memories, and therefore emotions, primary and secondary
+    Maybe emotion per gear, maybe emotion per gear per chrachter?
+
+In addition to stats, emotions are also meters
+    Not using an emotion for a while makes it more potent
+    Using an emotion too much dulls it
+
+    Using the same emotion multiple times in a row dulls it, expoentially
+    Using too many positive emotions in a row dulls all of them
+    Using opposite emotions in a row dulls the effect
+
+    Using positive emotions increases all negative emotions, and vice versa
+    Using an emotion directly increases it's opposite, and vice versa
+    Using a string of related emotions of the same valence in a row increases the effect
+
+    Gear can buff/debuff emotions, or provides effects based off emotion
+
+Emotions work like pokemon types, you take less/more damage from different emotional attacks based on your emotions and aptitudes
+
+Wording:
+    Dull/Strengthen emotional intensity
+    Raise/Lower emotional aptitude
+    Attack with ____ emotion
+
+
+Emotion represented by:
+    Positive/Negative valence
+    An opposite emotion of opposing valence
+    (Maybe): A complementary emotion of similar valence
+    Maximum "aptitude" of the emotion
+    Current "intensity" of the emotion - Represented by a meter, with a "neutral strength" range in the middle, and a more/less effective ranges above/below
+
+Refer to UI area of stats/meters as "current feelings"
+    Overlay on a heart background or something?
+    Maybe can do something cute using hearts as hp, and tying them together
+
+
+---------------------
+
+
+Joy / Sadness
+Fear / Bravery
+Suprise / Ready?
+Trust / Distrust
+Anger / Calm
+Envy / Content
+Love / Hate
+Acceptance / ???
+Annoyance / Content
+Nostalgia / ??
+Relieved / Anxious
+Confusion / ??
+Excited / Dread
+Awe / Bored
+
+Joy / Sadness
+Bravery / Fear
+Trust / Distrust
+Love / Hate
+Relief / Anxiety
+Excitement / Dread
+Calm / Anger
+
+
+Goal:
+    4 pairs of 2 each, 1 positive 1 negative valence
+    All emotions should be intrinsic to oneself, and also a noun, something you can feel
+
+
+--------
+
+UI Design:
+
+4 horizontal bars stacked up on the bottom, with 4 more opposite for 8 emotions
+Hearts where?
+
+-----------------
+
+
+response to combat gh discussion:
+    emotions do need uniqueness, I agree
+    need to decide on items and how they work alongside this
+    I like the idea of each emotion having a downside and upside
+        Being above threshold means upside + downside
+        Being below threshold means opposite, or smth
+        Different chracheters/gear give you different intensity ranges
+        Aptitude gives you stronger effect and or improves positive range?
+
+    Maybe the only actives (outside of consumables) are:
+        Each chachter has a unique abillity for each emotion
+        Abillity strength ties into intensity meter
+        That means all non-consumable items are passive / modify abillities uniquely, either boring or no item reuse
+
+
+
+
+
+Using an emotion repeatly strengthens the effect, but makes it riskier at the same time (some sort of downsides you can't quite predict always)
+To lower an emotion: Use an opposite valence emotion, don't use it for a bit
+
+
+
+
+
+Run flow:
+    1. Pick chrachter
+    2. Chrachter comes with preset emotions that function like spells/abillities/attacks
+        * Emotions have meters with intense/neutral/dull zones
+        * Different emotions have different effects depending on what zone they're in
+        * Using an emotion affects the meters of all your emotions (e.g., raise/lower itself, others can raise/lower, etc)
+    3. After killing each boss, a random emotion is added
+    4. Killing enemies gives only consumables and XP
+    5. Upon leveling up
+        *
+    6. Passive items can be found in shops
+        * These items are enhancers to your emotions
+        * For instance, given Rage,
