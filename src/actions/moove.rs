@@ -1,5 +1,5 @@
 use crate::actions::{Action, ActionStatus};
-use crate::components::GridPosition;
+use crate::components::{Direction, GridPosition};
 use crate::world::{ImmutableWorld, WorldExt};
 use bevy::core::Time;
 use bevy::math::Rect;
@@ -58,14 +58,6 @@ impl Action for MoveAction {
         world.add_action(MoveAnimationAction::new(self.entity, self.direction));
         ActionStatus::Finished
     }
-}
-
-#[derive(Clone, Copy)]
-pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
 }
 
 struct MoveAnimationAction {

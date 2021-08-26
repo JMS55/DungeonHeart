@@ -23,3 +23,11 @@ impl DerefMut for GridPosition {
         &mut self.0
     }
 }
+
+#[derive(Clone, Copy)]
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}

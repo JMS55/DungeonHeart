@@ -7,6 +7,9 @@ use bevy::prelude::{Entity, Without, World};
 use rand::Rng;
 use std::collections::HashSet;
 
+// TODO: Make sure no rooms are inaccessible
+// TODO: Spawn entities in batches
+
 pub struct RegenerateDungeonAction {
     rooms: Vec<Room>,
     wall_positions: HashSet<IVec2>,

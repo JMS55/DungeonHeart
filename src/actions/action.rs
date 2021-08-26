@@ -16,16 +16,6 @@ impl ActionStack {
     pub fn add(&mut self, action: Box<dyn Action>) {
         self.0.push(action);
     }
-
-    pub fn add_sequence<I>(&mut self, actions: I)
-    where
-        I: IntoIterator<Item = Box<dyn Action>>,
-        <I as IntoIterator>::IntoIter: DoubleEndedIterator,
-    {
-        for action in actions.into_iter().rev() {
-            self.add(action);
-        }
-    }
 }
 
 pub trait Action: Send + Sync {

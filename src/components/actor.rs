@@ -78,6 +78,8 @@ pub fn determine_turn_group(mut turn_group: ResMut<TurnGroup>, mut actors: Query
 /// Stops on the first action being given
 /// If the current turn group is Players, keep asking the first actor each tick until they give one
 /// If the current turn group isn't Players, ask each actor 3 times a tick
+// TODO: This is not correct. Player summons currently get infinite decision attempts.
+// Need to change things so only the actual player gets infinite attempts.
 pub fn decide_next_action(world: &mut World) {
     if !world.get_resource::<ActionStack>().unwrap().is_empty() {
         return;
