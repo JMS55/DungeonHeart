@@ -104,7 +104,7 @@ impl Brain for PlayerBrain {
                 let buffering_movement = Self::BufferingMovement {
                     last_move_time: Instant::now(),
                 };
-                if keyboard.pressed(KeyCode::Key1) {
+                if keyboard.just_pressed(KeyCode::Key1) {
                     (Self::WaitingForAttackDirection, None)
                 } else if keyboard.pressed(KeyCode::W) && move_up_action.is_some() {
                     (buffering_movement, move_up_action)
@@ -124,7 +124,7 @@ impl Brain for PlayerBrain {
                 let buffering_movement = Self::BufferingMovement {
                     last_move_time: *last_move_time,
                 };
-                if keyboard.pressed(KeyCode::Key1) {
+                if keyboard.just_pressed(KeyCode::Key1) {
                     (Self::WaitingForAttackDirection, None)
                 } else if keyboard.pressed(KeyCode::W) && move_up_action.is_some() {
                     if last_move_time.elapsed() >= Duration::from_millis(300) {
@@ -156,7 +156,7 @@ impl Brain for PlayerBrain {
             }
 
             Self::MovingUnbuffered => {
-                if keyboard.pressed(KeyCode::Key1) {
+                if keyboard.just_pressed(KeyCode::Key1) {
                     (Self::WaitingForAttackDirection, None)
                 } else if keyboard.pressed(KeyCode::W) && move_up_action.is_some() {
                     (Self::MovingUnbuffered, move_up_action)
@@ -172,8 +172,7 @@ impl Brain for PlayerBrain {
             }
 
             Self::WaitingForAttackDirection => {
-                // TODO: Only close if it's been Xms since first press
-                if keyboard.pressed(KeyCode::Key1) {
+                if keyboard.just_pressed(KeyCode::Key1) {
                     (Self::WaitingForAnyInput, None)
                 } else if keyboard.pressed(KeyCode::W) && attack_up_action.is_some() {
                     (Self::WaitingForAnyInput, attack_up_action)
