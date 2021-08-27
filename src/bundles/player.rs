@@ -25,14 +25,16 @@ impl Player {
         Self {
             position: GridPosition::new(x, y),
             health: Health::new(30),
-            actor: Actor::new(PlayerBrain::WaitingForAnyInput, TurnGroup::Player),
+            actor: Actor::new_unlimited_decision_attempts(
+                PlayerBrain::WaitingForAnyInput,
+                TurnGroup::Player,
+            ),
             sprite: SpriteBundle::new("soul_spectre.png", x, y),
             kbf: KeepBetweenFloors,
         }
     }
 }
 
-#[derive(Clone)]
 enum PlayerBrain {
     WaitingForAnyInput,
     BufferingMovement { last_move_time: Instant },

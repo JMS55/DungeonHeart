@@ -9,8 +9,8 @@ impl ActionStack {
         Self(Vec::new())
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
+    pub fn is_not_empty(&self) -> bool {
+        !self.0.is_empty()
     }
 
     pub fn add(&mut self, action: Box<dyn Action>) {
