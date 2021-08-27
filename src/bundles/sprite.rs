@@ -3,6 +3,7 @@ use bevy::prelude::{Handle, SpriteBundle, Transform};
 use bevy::sprite::{ColorMaterial, Sprite};
 use once_cell::sync::OnceCell;
 use std::collections::HashMap;
+use std::ffi::{OsStr, OsString};
 
 pub trait SpriteBundleExt {
     fn new(sprite: &str, x: i32, y: i32) -> Self;
@@ -35,21 +36,17 @@ impl SpriteBundleExt for SpriteBundle {
     }
 }
 
-pub static MATERIAL_MAP: MaterialMap = MaterialMap {
-    map: OnceCell::new(),
-};
+pub static MATERIAL_MAP: MaterialMap = MaterialMap(OnceCell::new());
 
-pub struct MaterialMap {
-    pub map: OnceCell<HashMap<&'static str, Handle<ColorMaterial>>>,
-}
+pub struct MaterialMap(pub OnceCell<HashMap<OsString, Handle<ColorMaterial>>>);
 
 impl MaterialMap {
     fn get(key: &str) -> Handle<ColorMaterial> {
         MATERIAL_MAP
-            .map
+            .0
             .get()
             .unwrap()
-            .get(key)
+            .get(OsStr::new(key))
             .unwrap()
             .clone_weak()
     }

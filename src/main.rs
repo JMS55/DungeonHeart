@@ -13,6 +13,8 @@ use bevy::DefaultPlugins;
 use bundles::{Player, SkeletonScout, MATERIAL_MAP};
 use components::{decide_next_action, determine_turn_group, TurnGroup};
 use std::collections::HashMap;
+use std::fs::read_dir;
+use std::path::Path;
 
 mod actions;
 mod bundles;
@@ -44,18 +46,12 @@ fn init_game(world: &mut World) {
     let mut materials =
         unsafe { world.get_resource_unchecked_mut::<Assets<ColorMaterial>>() }.unwrap();
     let mut material_map = HashMap::new();
-    // TODO: Autoload entire folder
-    for material in [
-        "floor_alt.png",
-        "floor.png",
-        "skeleton_scout.png",
-        "soul_spectre.png",
-        "wall1.png",
-        "wall2.png",
-    ] {
-        material_map.insert(material, materials.add(assets.load(material).into()));
+    for file in read_dir("assets").unwrap() {
+        let material_name = file.unwrap().file_name();
+        let material_handle = materials.add(assets.load(Path::new(&material_name)).into());
+        material_map.insert(material_name, material_handle);
     }
-    MATERIAL_MAP.map.set(material_map).unwrap();
+    MATERIAL_MAP.0.set(material_map).unwrap();
 
     world
         .spawn()
