@@ -19,8 +19,8 @@ impl ActionStack {
 }
 
 pub trait Action: Send + Sync {
-    fn can_perform(&self, world: &mut ImmutableWorld) -> bool;
-    fn perform(&mut self, world: &mut World) -> ActionStatus;
+    fn can_attempt(&self, world: &mut ImmutableWorld) -> bool;
+    fn attempt(&mut self, world: &mut World) -> ActionStatus;
 
     fn to_brain_decision(self) -> Option<Box<dyn Action>>
     where
@@ -29,11 +29,11 @@ pub trait Action: Send + Sync {
         Some(Box::new(self))
     }
 
-    fn to_brain_decision_if_can_perform(self, world: &mut ImmutableWorld) -> Option<Box<dyn Action>>
+    fn to_brain_decision_if_can_attempt(self, world: &mut ImmutableWorld) -> Option<Box<dyn Action>>
     where
         Self: Sized + 'static,
     {
-        if self.can_perform(world) {
+        if self.can_attempt(world) {
             self.to_brain_decision()
         } else {
             None
@@ -47,17 +47,17 @@ pub enum ActionStatus {
     Unfinished,
 }
 
-/// Takes the top action from the stack and runs it
-/// Puts the action back afterwards if it's unfinished
-/// Repeats until it's out of actions, an action is unfinished, or it's been running for at least 8ms
-pub fn perform_next_action(world: &mut World) {
+/// Take the top action from the stack and run it
+/// Put the action back afterwards if it's unfinished
+/// Repeat until out of actions, an action is unfinished, or it's been running for at least 8ms
+pub fn attempt_next_action(world: &mut World) {
     let start = Instant::now();
     loop {
         let mut action_stack = world.get_resource_mut::<ActionStack>().unwrap();
         match action_stack.0.pop() {
             Some(mut action) => {
                 let action_index = action_stack.0.len();
-                let action_status = action.perform(world);
+                let action_status = action.attempt(world);
 
                 if action_status == ActionStatus::Unfinished {
                     let mut action_stack = world.get_resource_mut::<ActionStack>().unwrap();

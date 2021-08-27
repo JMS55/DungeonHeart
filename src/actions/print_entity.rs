@@ -7,11 +7,11 @@ pub struct PrintEntityAction {
 }
 
 impl Action for PrintEntityAction {
-    fn can_perform(&self, _: &mut ImmutableWorld) -> bool {
+    fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
         true
     }
 
-    fn perform(&mut self, _: &mut World) -> ActionStatus {
+    fn attempt(&mut self, _: &mut World) -> ActionStatus {
         println!("Entity {:?} is acting", self.entity);
         ActionStatus::Finished
     }

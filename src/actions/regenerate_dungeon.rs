@@ -27,11 +27,11 @@ impl RegenerateDungeonAction {
 }
 
 impl Action for RegenerateDungeonAction {
-    fn can_perform(&self, _: &mut ImmutableWorld) -> bool {
+    fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
         true
     }
 
-    fn perform(&mut self, world: &mut World) -> ActionStatus {
+    fn attempt(&mut self, world: &mut World) -> ActionStatus {
         Self::cleanup_previous(world);
         self.plan_rooms();
         self.plan_corridors();

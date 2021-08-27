@@ -52,22 +52,22 @@ impl Brain for PlayerBrain {
             entity: this_entity,
             direction: Direction::Up,
         }
-        .to_brain_decision_if_can_perform(world);
+        .to_brain_decision_if_can_attempt(world);
         let move_down_action = MoveAction {
             entity: this_entity,
             direction: Direction::Down,
         }
-        .to_brain_decision_if_can_perform(world);
+        .to_brain_decision_if_can_attempt(world);
         let move_left_action = MoveAction {
             entity: this_entity,
             direction: Direction::Left,
         }
-        .to_brain_decision_if_can_perform(world);
+        .to_brain_decision_if_can_attempt(world);
         let move_right_action = MoveAction {
             entity: this_entity,
             direction: Direction::Right,
         }
-        .to_brain_decision_if_can_perform(world);
+        .to_brain_decision_if_can_attempt(world);
 
         let this_position = world.get::<GridPosition>(this_entity).unwrap().clone();
         let attack_up_action = world
@@ -75,28 +75,28 @@ impl Brain for PlayerBrain {
             .iter(world)
             .find(|(_, _, position)| this_position.add(IVec2::new(0, 1)).eq(position))
             .map(|(target, _, _)| DamageAction { damage: 10, target })
-            .map(|action| action.to_brain_decision_if_can_perform(world))
+            .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();
         let attack_down_action = world
             .query::<(Entity, &Health, &GridPosition)>()
             .iter(world)
             .find(|(_, _, position)| this_position.add(IVec2::new(0, -1)).eq(position))
             .map(|(target, _, _)| DamageAction { damage: 10, target })
-            .map(|action| action.to_brain_decision_if_can_perform(world))
+            .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();
         let attack_left_action = world
             .query::<(Entity, &Health, &GridPosition)>()
             .iter(world)
             .find(|(_, _, position)| this_position.add(IVec2::new(-1, 0)).eq(position))
             .map(|(target, _, _)| DamageAction { damage: 10, target })
-            .map(|action| action.to_brain_decision_if_can_perform(world))
+            .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();
         let attack_right_action = world
             .query::<(Entity, &Health, &GridPosition)>()
             .iter(world)
             .find(|(_, _, position)| this_position.add(IVec2::new(1, 0)).eq(position))
             .map(|(target, _, _)| DamageAction { damage: 10, target })
-            .map(|action| action.to_brain_decision_if_can_perform(world))
+            .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();
 
         let keyboard = world.get_resource::<Input<KeyCode>>().unwrap();

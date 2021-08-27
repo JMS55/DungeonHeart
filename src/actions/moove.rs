@@ -12,7 +12,7 @@ pub struct MoveAction {
 }
 
 impl Action for MoveAction {
-    fn can_perform(&self, world: &mut ImmutableWorld) -> bool {
+    fn can_attempt(&self, world: &mut ImmutableWorld) -> bool {
         let current_position = match world.get::<GridPosition>(self.entity) {
             Some(p) => p,
             None => return false,
@@ -34,7 +34,7 @@ impl Action for MoveAction {
         true
     }
 
-    fn perform(&mut self, world: &mut World) -> ActionStatus {
+    fn attempt(&mut self, world: &mut World) -> ActionStatus {
         let current_position = match world.get::<GridPosition>(self.entity) {
             Some(p) => p,
             None => return ActionStatus::Finished,
@@ -79,12 +79,12 @@ impl MoveAnimationAction {
 }
 
 impl Action for MoveAnimationAction {
-    fn can_perform(&self, _: &mut ImmutableWorld) -> bool {
+    fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
         true
     }
 
     // TODO: Use "&/&mut transform.into_inner().translation" from bevy 0.6
-    fn perform(&mut self, world: &mut World) -> ActionStatus {
+    fn attempt(&mut self, world: &mut World) -> ActionStatus {
         let transform = match world.get::<GlobalTransform>(self.entity) {
             Some(t) => t,
             None => return ActionStatus::Finished,

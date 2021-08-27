@@ -12,11 +12,11 @@ pub struct DamageAction {
 }
 
 impl Action for DamageAction {
-    fn can_perform(&self, world: &mut ImmutableWorld) -> bool {
+    fn can_attempt(&self, world: &mut ImmutableWorld) -> bool {
         world.get::<Health>(self.target).is_some()
     }
 
-    fn perform(&mut self, world: &mut World) -> ActionStatus {
+    fn attempt(&mut self, world: &mut World) -> ActionStatus {
         if let Some(target_health) = &mut world.get_mut::<Health>(self.target) {
             target_health.current = target_health.current.saturating_sub(self.damage);
 
@@ -49,11 +49,11 @@ impl DamageAnimationAction {
 }
 
 impl Action for DamageAnimationAction {
-    fn can_perform(&self, _: &mut ImmutableWorld) -> bool {
+    fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
         true
     }
 
-    fn perform(&mut self, world: &mut World) -> ActionStatus {
+    fn attempt(&mut self, world: &mut World) -> ActionStatus {
         let transform = match world.get::<GlobalTransform>(self.entity) {
             Some(t) => t,
             None => return ActionStatus::Finished,
@@ -84,11 +84,11 @@ struct DeleteAction {
 }
 
 impl Action for DeleteAction {
-    fn can_perform(&self, _: &mut ImmutableWorld) -> bool {
+    fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
         true
     }
 
-    fn perform(&mut self, world: &mut World) -> ActionStatus {
+    fn attempt(&mut self, world: &mut World) -> ActionStatus {
         world.despawn(self.entity);
         ActionStatus::Finished
     }
