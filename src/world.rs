@@ -1,7 +1,7 @@
 use crate::actions::{Action, ActionStack};
 use bevy::ecs::prelude::QueryState;
 use bevy::ecs::query::{ReadOnlyFetch, WorldQuery};
-use bevy::math::{Rect, Vec2};
+use bevy::math::{vec2, Rect};
 use bevy::prelude::{GlobalTransform, World};
 use bevy::render::camera::OrthographicProjection;
 use std::ops::Deref;
@@ -51,16 +51,16 @@ impl WorldExt for World {
             .next();
         match camera {
             Some((projection, transform)) => {
-                let p1 = Vec2::new(
+                let p1 = vec2(
                     projection.left + transform.translation.x,
                     projection.top + transform.translation.y,
                 );
-                let p2 = Vec2::new(
+                let p2 = vec2(
                     projection.right + transform.translation.x,
                     projection.bottom + transform.translation.y,
                 );
-                let p3 = Vec2::new(rect.left, rect.top);
-                let p4 = Vec2::new(rect.right, rect.bottom);
+                let p3 = vec2(rect.left, rect.top);
+                let p4 = vec2(rect.right, rect.bottom);
                 p2.y <= p3.y && p1.y >= p4.y && p2.x >= p3.x && p1.x <= p4.x
             }
             None => false,

@@ -1,8 +1,8 @@
 use crate::actions::{Action, ActionStatus};
-use crate::components::{Direction, GridPosition};
+use crate::components::Direction;
 use crate::world::{ImmutableWorld, WorldExt};
 use bevy::core::Time;
-use bevy::math::Rect;
+use bevy::math::{IVec2, Rect};
 use bevy::prelude::{Entity, GlobalTransform, Transform, World};
 use std::time::Duration;
 
@@ -11,51 +11,34 @@ pub struct MoveAction {
     pub direction: Direction,
 }
 
+impl MoveAction {
+    fn intended_position(&self, world: &mut ImmutableWorld) -> Option<IVec2> {
+        let current_position = world.get::<IVec2>(self.entity)?;
+        let intended_position = *current_position + self.direction.as_offset();
+
+        if world
+            .query::<&IVec2>()
+            .iter(&world)
+            .any(|position| position == &intended_position)
+        {
+            None
+        } else {
+            Some(intended_position)
+        }
+    }
+}
+
 impl Action for MoveAction {
     fn can_attempt(&self, world: &mut ImmutableWorld) -> bool {
-        let current_position = match world.get::<GridPosition>(self.entity) {
-            Some(p) => p,
-            None => return false,
-        };
-
-        let mut intended_position = current_position.clone();
-        match self.direction {
-            Direction::Up => intended_position.y += 1,
-            Direction::Down => intended_position.y -= 1,
-            Direction::Left => intended_position.x -= 1,
-            Direction::Right => intended_position.x += 1,
-        }
-
-        for position in world.query::<&GridPosition>().iter(&world) {
-            if position == &intended_position {
-                return false;
-            }
-        }
-        true
+        self.intended_position(world).is_some()
     }
 
     fn attempt(&mut self, world: &mut World) -> ActionStatus {
-        let current_position = match world.get::<GridPosition>(self.entity) {
-            Some(p) => p,
-            None => return ActionStatus::Finished,
-        };
-
-        let mut intended_position = current_position.clone();
-        match self.direction {
-            Direction::Up => intended_position.y += 1,
-            Direction::Down => intended_position.y -= 1,
-            Direction::Left => intended_position.x -= 1,
-            Direction::Right => intended_position.x += 1,
+        if let Some(intended_position) = self.intended_position(&mut ImmutableWorld::new(world)) {
+            *world.get_mut::<IVec2>(self.entity).unwrap() = intended_position;
+            world.add_action(MoveAnimationAction::new(self.entity, self.direction));
         }
 
-        for position in world.query::<&GridPosition>().iter(&world) {
-            if position == &intended_position {
-                return ActionStatus::Finished;
-            }
-        }
-
-        *world.get_mut::<GridPosition>(self.entity).unwrap() = intended_position;
-        world.add_action(MoveAnimationAction::new(self.entity, self.direction));
         ActionStatus::Finished
     }
 }
@@ -80,7 +63,7 @@ impl MoveAnimationAction {
 
 impl Action for MoveAnimationAction {
     fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
-        true
+        unreachable!()
     }
 
     // TODO: Use "&/&mut transform.into_inner().translation" from bevy 0.6
@@ -112,13 +95,8 @@ impl Action for MoveAnimationAction {
                 Some(t) => t,
                 None => return ActionStatus::Finished,
             };
-            let translation = &mut transform.translation;
-            match self.direction {
-                Direction::Up => translation.y += pixels_to_move,
-                Direction::Down => translation.y -= pixels_to_move,
-                Direction::Left => translation.x -= pixels_to_move,
-                Direction::Right => translation.x += pixels_to_move,
-            }
+            transform.translation +=
+                self.direction.as_offset().as_f32().extend(0.0) * pixels_to_move;
 
             self.pixels_remaining -= pixels_to_move;
             if self.pixels_remaining == 0.0 {
@@ -131,13 +109,8 @@ impl Action for MoveAnimationAction {
                 Some(t) => t,
                 None => return ActionStatus::Finished,
             };
-            let translation = &mut transform.translation;
-            match self.direction {
-                Direction::Up => translation.y += self.pixels_remaining,
-                Direction::Down => translation.y -= self.pixels_remaining,
-                Direction::Left => translation.x -= self.pixels_remaining,
-                Direction::Right => translation.x += self.pixels_remaining,
-            }
+            transform.translation +=
+                self.direction.as_offset().as_f32().extend(0.0) * self.pixels_remaining;
 
             ActionStatus::Finished
         }

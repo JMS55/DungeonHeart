@@ -1,18 +1,15 @@
 use crate::actions::{Action, DamageAction, MoveAction};
 use crate::bundles::SpriteBundleExt;
-use crate::components::{
-    Actor, Brain, Direction, GridPosition, Health, KeepBetweenFloors, TurnGroup,
-};
+use crate::components::{Actor, Brain, Direction, Health, KeepBetweenFloors, TurnGroup};
 use crate::world::ImmutableWorld;
 use bevy::input::Input;
-use bevy::math::IVec2;
+use bevy::math::{ivec2, IVec2};
 use bevy::prelude::{Bundle, Entity, KeyCode, SpriteBundle};
-use std::ops::Add;
 use std::time::{Duration, Instant};
 
 #[derive(Bundle)]
 pub struct Player {
-    position: GridPosition,
+    position: IVec2,
     health: Health,
     actor: Actor,
     #[bundle]
@@ -23,7 +20,7 @@ pub struct Player {
 impl Player {
     pub fn new(x: i32, y: i32) -> Self {
         Self {
-            position: GridPosition::new(x, y),
+            position: ivec2(x, y),
             health: Health::new(30),
             actor: Actor::new_unlimited_decision_attempts(
                 PlayerBrain::WaitingForAnyInput,
@@ -69,32 +66,32 @@ impl Brain for PlayerBrain {
         }
         .to_brain_decision_if_can_attempt(world);
 
-        let this_position = world.get::<GridPosition>(this_entity).unwrap().clone();
+        let this_position = world.get::<IVec2>(this_entity).unwrap().clone();
         let attack_up_action = world
-            .query::<(Entity, &Health, &GridPosition)>()
+            .query::<(Entity, &Health, &IVec2)>()
             .iter(world)
-            .find(|(_, _, position)| this_position.add(IVec2::new(0, 1)).eq(position))
+            .find(|(_, _, position)| this_position + ivec2(0, 1) == **position)
             .map(|(target, _, _)| DamageAction { damage: 10, target })
             .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();
         let attack_down_action = world
-            .query::<(Entity, &Health, &GridPosition)>()
+            .query::<(Entity, &Health, &IVec2)>()
             .iter(world)
-            .find(|(_, _, position)| this_position.add(IVec2::new(0, -1)).eq(position))
+            .find(|(_, _, position)| this_position + ivec2(0, -1) == **position)
             .map(|(target, _, _)| DamageAction { damage: 10, target })
             .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();
         let attack_left_action = world
-            .query::<(Entity, &Health, &GridPosition)>()
+            .query::<(Entity, &Health, &IVec2)>()
             .iter(world)
-            .find(|(_, _, position)| this_position.add(IVec2::new(-1, 0)).eq(position))
+            .find(|(_, _, position)| this_position + ivec2(-1, 0) == **position)
             .map(|(target, _, _)| DamageAction { damage: 10, target })
             .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();
         let attack_right_action = world
-            .query::<(Entity, &Health, &GridPosition)>()
+            .query::<(Entity, &Health, &IVec2)>()
             .iter(world)
-            .find(|(_, _, position)| this_position.add(IVec2::new(1, 0)).eq(position))
+            .find(|(_, _, position)| this_position + ivec2(1, 0) == **position)
             .map(|(target, _, _)| DamageAction { damage: 10, target })
             .map(|action| action.to_brain_decision_if_can_attempt(world))
             .flatten();

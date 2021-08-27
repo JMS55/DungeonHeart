@@ -8,7 +8,7 @@ pub struct PrintEntityAction {
 
 impl Action for PrintEntityAction {
     fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
-        true
+        unreachable!()
     }
 
     fn attempt(&mut self, _: &mut World) -> ActionStatus {

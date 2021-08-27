@@ -2,7 +2,7 @@ use crate::actions::{Action, ActionStatus};
 use crate::bundles::{Floor, Wall};
 use crate::components::KeepBetweenFloors;
 use crate::world::ImmutableWorld;
-use bevy::math::IVec2;
+use bevy::math::{ivec2, IVec2};
 use bevy::prelude::{Entity, Without, World};
 use rand::Rng;
 use std::collections::HashSet;
@@ -28,7 +28,7 @@ impl RegenerateDungeonAction {
 
 impl Action for RegenerateDungeonAction {
     fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
-        true
+        unreachable!()
     }
 
     fn attempt(&mut self, world: &mut World) -> ActionStatus {
@@ -55,16 +55,16 @@ impl RegenerateDungeonAction {
 
     fn plan_rooms(&mut self) {
         let starting_room = Room {
-            center: IVec2::new(0, 0),
-            radius: IVec2::new(3, 3),
+            center: ivec2(0, 0),
+            radius: ivec2(3, 3),
         };
         self.rooms.push(starting_room);
 
         let mut rng = rand::thread_rng();
         'room_placing_loop: for _ in 0..200 {
             let room = Room {
-                center: IVec2::new(rng.gen_range(-30..31), rng.gen_range(-30..31)),
-                radius: IVec2::new(rng.gen_range(2..8), rng.gen_range(2..8)),
+                center: ivec2(rng.gen_range(-30..31), rng.gen_range(-30..31)),
+                radius: ivec2(rng.gen_range(2..8), rng.gen_range(2..8)),
             };
             for other_room in &self.rooms {
                 let required_gap = rng.gen_range(3..10);
@@ -112,10 +112,10 @@ impl RegenerateDungeonAction {
             );
 
             for x in start_x.min(end_x)..start_x.max(end_x) {
-                self.floor_positions.insert(IVec2::new(x, start_y));
+                self.floor_positions.insert(ivec2(x, start_y));
             }
             for y in start_y.min(end_y)..=start_y.max(end_y) {
-                self.floor_positions.insert(IVec2::new(end_x, y));
+                self.floor_positions.insert(ivec2(end_x, y));
             }
         }
     }
@@ -123,24 +123,16 @@ impl RegenerateDungeonAction {
     fn create_walls(&mut self, world: &mut World) {
         for room in &self.rooms {
             for x in -(room.radius.x + 1)..=(room.radius.x + 1) {
-                self.wall_positions.insert(IVec2::new(
-                    room.center.x + x,
-                    room.center.y + room.radius.y + 1,
-                ));
-                self.wall_positions.insert(IVec2::new(
-                    room.center.x + x,
-                    room.center.y - room.radius.y - 1,
-                ));
+                self.wall_positions
+                    .insert(ivec2(room.center.x + x, room.center.y + room.radius.y + 1));
+                self.wall_positions
+                    .insert(ivec2(room.center.x + x, room.center.y - room.radius.y - 1));
             }
             for y in -room.radius.y..=room.radius.y {
-                self.wall_positions.insert(IVec2::new(
-                    room.center.x + room.radius.x + 1,
-                    room.center.y + y,
-                ));
-                self.wall_positions.insert(IVec2::new(
-                    room.center.x - room.radius.x - 1,
-                    room.center.y + y,
-                ));
+                self.wall_positions
+                    .insert(ivec2(room.center.x + room.radius.x + 1, room.center.y + y));
+                self.wall_positions
+                    .insert(ivec2(room.center.x - room.radius.x - 1, room.center.y + y));
             }
         }
 
@@ -155,8 +147,7 @@ impl RegenerateDungeonAction {
                         continue 'neighbor_loop;
                     }
                 }
-                self.wall_positions
-                    .insert(IVec2::new(neighbor.x, neighbor.y));
+                self.wall_positions.insert(ivec2(neighbor.x, neighbor.y));
             }
         }
 
@@ -166,9 +157,7 @@ impl RegenerateDungeonAction {
             .copied()
             .collect();
         for position in &self.wall_positions {
-            let variant = self
-                .wall_positions
-                .contains(&(*position - IVec2::new(0, 1)));
+            let variant = self.wall_positions.contains(&(*position - ivec2(0, 1)));
             world
                 .spawn()
                 .insert_bundle(Wall::new(position.x, position.y, !variant));
@@ -180,7 +169,7 @@ impl RegenerateDungeonAction {
             for x in -room.radius.x..=room.radius.x {
                 for y in -room.radius.y..=room.radius.y {
                     self.floor_positions
-                        .insert(IVec2::new(room.center.x + x, room.center.y + y));
+                        .insert(ivec2(room.center.x + x, room.center.y + y));
                 }
             }
         }
@@ -200,13 +189,13 @@ struct Room {
 
 fn neighbors(p: &IVec2) -> [IVec2; 8] {
     [
-        *p + IVec2::new(-1, 1),
-        *p + IVec2::new(0, 1),
-        *p + IVec2::new(1, 1),
-        *p + IVec2::new(1, 0),
-        *p + IVec2::new(1, -1),
-        *p + IVec2::new(0, -1),
-        *p + IVec2::new(-1, -1),
-        *p + IVec2::new(-1, 0),
+        *p + ivec2(-1, 1),
+        *p + ivec2(0, 1),
+        *p + ivec2(1, 1),
+        *p + ivec2(1, 0),
+        *p + ivec2(1, -1),
+        *p + ivec2(0, -1),
+        *p + ivec2(-1, -1),
+        *p + ivec2(-1, 0),
     ]
 }

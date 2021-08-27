@@ -1,12 +1,13 @@
 use crate::actions::{Action, PrintEntityAction};
 use crate::bundles::SpriteBundleExt;
-use crate::components::{Actor, GridPosition, Health, TurnGroup};
+use crate::components::{Actor, Health, TurnGroup};
 use crate::world::ImmutableWorld;
+use bevy::math::{ivec2, IVec2};
 use bevy::prelude::{Bundle, Entity, SpriteBundle};
 
 #[derive(Bundle)]
 pub struct SkeletonScout {
-    position: GridPosition,
+    position: IVec2,
     health: Health,
     actor: Actor,
     #[bundle]
@@ -16,7 +17,7 @@ pub struct SkeletonScout {
 impl SkeletonScout {
     pub fn new(x: i32, y: i32) -> Self {
         Self {
-            position: GridPosition::new(x, y),
+            position: ivec2(x, y),
             health: Health::new(20),
             actor: Actor::new(print_entity_brain, TurnGroup::Enemy),
             sprite: SpriteBundle::new("skeleton_scout.png", x, y),

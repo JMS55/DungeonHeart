@@ -50,7 +50,7 @@ impl DamageAnimationAction {
 
 impl Action for DamageAnimationAction {
     fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
-        true
+        unreachable!()
     }
 
     fn attempt(&mut self, world: &mut World) -> ActionStatus {
@@ -85,7 +85,7 @@ struct DeleteAction {
 
 impl Action for DeleteAction {
     fn can_attempt(&self, _: &mut ImmutableWorld) -> bool {
-        true
+        unreachable!()
     }
 
     fn attempt(&mut self, world: &mut World) -> ActionStatus {
