@@ -4,6 +4,7 @@ use crate::components::KeepBetweenFloors;
 use crate::world::ImmutableWorld;
 use bevy::math::{ivec2, IVec2};
 use bevy::prelude::{Entity, Without, World};
+use rand::prelude::ThreadRng;
 use rand::Rng;
 use std::collections::HashSet;
 
@@ -11,7 +12,6 @@ use std::collections::HashSet;
 // TODO: Spawn entities in batches
 
 pub struct RegenerateDungeonAction {
-    rooms: Vec<Room>,
     wall_positions: HashSet<IVec2>,
     floor_positions: HashSet<IVec2>,
 }
@@ -19,7 +19,6 @@ pub struct RegenerateDungeonAction {
 impl RegenerateDungeonAction {
     pub fn new() -> Self {
         Self {
-            rooms: Vec::new(),
             wall_positions: HashSet::new(),
             floor_positions: HashSet::new(),
         }
@@ -33,8 +32,8 @@ impl Action for RegenerateDungeonAction {
 
     fn attempt(&mut self, world: &mut World) -> ActionStatus {
         Self::cleanup_previous(world);
-        self.plan_rooms();
-        self.plan_corridors();
+        self.plan_rooms(world);
+        self.plan_corridors(world);
         self.create_walls(world);
         self.create_floors(world);
 
@@ -44,6 +43,8 @@ impl Action for RegenerateDungeonAction {
 
 impl RegenerateDungeonAction {
     fn cleanup_previous(world: &mut World) {
+        world.get_resource_mut::<Vec<Room>>().unwrap().clear();
+
         let entities_to_delete = world
             .query_filtered::<Entity, Without<KeepBetweenFloors>>()
             .iter(world)
@@ -53,12 +54,13 @@ impl RegenerateDungeonAction {
         }
     }
 
-    fn plan_rooms(&mut self) {
+    fn plan_rooms(&mut self, world: &mut World) {
+        let mut rooms = world.get_resource_mut::<Vec<Room>>().unwrap();
         let starting_room = Room {
             center: ivec2(0, 0),
             radius: ivec2(3, 3),
         };
-        self.rooms.push(starting_room);
+        rooms.push(starting_room);
 
         let mut rng = rand::thread_rng();
         'room_placing_loop: for _ in 0..200 {
@@ -66,62 +68,50 @@ impl RegenerateDungeonAction {
                 center: ivec2(rng.gen_range(-30..31), rng.gen_range(-30..31)),
                 radius: ivec2(rng.gen_range(2..8), rng.gen_range(2..8)),
             };
-            for other_room in &self.rooms {
+            for other_room in rooms.iter() {
                 let required_gap = rng.gen_range(3..10);
-                let x_gap = (room.center.x - other_room.center.x).abs()
-                    - room.radius.x
-                    - other_room.radius.x
-                    - 3;
-                let y_gap = (room.center.y - other_room.center.y).abs()
-                    - room.radius.y
-                    - other_room.radius.y
-                    - 3;
-                let actual_gap = x_gap.max(y_gap);
-                if actual_gap < required_gap && actual_gap != -1 {
+                let gap = ((room.center - other_room.center).abs()
+                    - room.radius
+                    - other_room.radius
+                    - IVec2::splat(3))
+                .max_element();
+                if gap < required_gap && gap != -1 {
                     continue 'room_placing_loop;
                 }
             }
-            self.rooms.push(room);
+            rooms.push(room);
         }
     }
 
-    fn plan_corridors(&mut self) {
+    fn plan_corridors(&mut self, world: &mut World) {
+        let rooms = world.get_resource::<Vec<Room>>().unwrap();
         let mut rng = rand::thread_rng();
-        for (start_room_index, start_room) in self.rooms.iter().enumerate() {
-            let mut end_room_index = rng.gen_range(0..self.rooms.len());
+
+        for (start_room_index, start_room) in rooms.iter().enumerate() {
+            let mut end_room_index = rng.gen_range(0..rooms.len());
             while end_room_index == start_room_index {
-                end_room_index = rng.gen_range(0..self.rooms.len());
+                end_room_index = rng.gen_range(0..rooms.len());
             }
-            let end_room = &self.rooms[end_room_index];
+            let end_room = &rooms[end_room_index];
 
-            let start_x = rng.gen_range(
-                (start_room.center.x - start_room.radius.x as i32)
-                    ..(start_room.center.x + start_room.radius.x as i32 + 1),
-            );
-            let start_y = rng.gen_range(
-                (start_room.center.y - start_room.radius.y as i32)
-                    ..(start_room.center.y + start_room.radius.y as i32 + 1),
-            );
-            let end_x = rng.gen_range(
-                (end_room.center.x - end_room.radius.x as i32)
-                    ..(end_room.center.x + end_room.radius.x as i32 + 1),
-            );
-            let end_y = rng.gen_range(
-                (end_room.center.y - end_room.radius.y as i32)
-                    ..(end_room.center.y + end_room.radius.y as i32 + 1),
-            );
+            let start = start_room.random_tile_inside(&mut rng);
+            let end = end_room.random_tile_inside(&mut rng);
+            let xx = ivec2(start.x, end.x);
+            let yy = ivec2(start.y, end.y);
 
-            for x in start_x.min(end_x)..start_x.max(end_x) {
-                self.floor_positions.insert(ivec2(x, start_y));
+            for x in xx.min_element()..xx.max_element() {
+                self.floor_positions.insert(ivec2(x, start.y));
             }
-            for y in start_y.min(end_y)..=start_y.max(end_y) {
-                self.floor_positions.insert(ivec2(end_x, y));
+            for y in yy.min_element()..=yy.max_element() {
+                self.floor_positions.insert(ivec2(end.x, y));
             }
         }
     }
 
     fn create_walls(&mut self, world: &mut World) {
-        for room in &self.rooms {
+        let rooms = world.get_resource::<Vec<Room>>().unwrap();
+
+        for room in rooms {
             for x in -(room.radius.x + 1)..=(room.radius.x + 1) {
                 self.wall_positions
                     .insert(ivec2(room.center.x + x, room.center.y + room.radius.y + 1));
@@ -138,7 +128,7 @@ impl RegenerateDungeonAction {
 
         for corridor_position in &self.floor_positions {
             'neighbor_loop: for neighbor in &neighbors(corridor_position) {
-                for room in &self.rooms {
+                for room in rooms {
                     let x_range =
                         (room.center.x - room.radius.x - 1)..=(room.center.x + room.radius.x + 1);
                     let y_range =
@@ -165,7 +155,8 @@ impl RegenerateDungeonAction {
     }
 
     fn create_floors(&mut self, world: &mut World) {
-        for room in &self.rooms {
+        let rooms = world.get_resource::<Vec<Room>>().unwrap();
+        for room in rooms {
             for x in -room.radius.x..=room.radius.x {
                 for y in -room.radius.y..=room.radius.y {
                     self.floor_positions
@@ -182,9 +173,17 @@ impl RegenerateDungeonAction {
     }
 }
 
-struct Room {
+pub struct Room {
     center: IVec2,
     radius: IVec2,
+}
+
+impl Room {
+    pub fn random_tile_inside(&self, rng: &mut ThreadRng) -> IVec2 {
+        let n1 = self.center - self.radius;
+        let n2 = self.center + self.radius;
+        ivec2(rng.gen_range(n1.x..=n2.x), rng.gen_range(n1.y..=n2.y))
+    }
 }
 
 fn neighbors(p: &IVec2) -> [IVec2; 8] {

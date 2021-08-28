@@ -1,7 +1,7 @@
 use crate::actions::RegenerateDungeonAction;
 use crate::components::KeepBetweenFloors;
 use crate::world::WorldExt;
-use actions::{attempt_next_action, ActionStack};
+use actions::{attempt_next_action, ActionStack, Room};
 use bevy::prelude::{
     App, AssetServer, Assets, BuildWorldChildren, ClearColor, Color,
     ExclusiveSystemDescriptorCoercion, IntoExclusiveSystem, IntoSystem, OrthographicCameraBundle,
@@ -31,6 +31,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.05)))
         .insert_resource(ActionStack::new())
         .insert_resource(TurnGroup::Neutral)
+        .insert_resource::<Vec<Room>>(Vec::new())
         .add_plugins(DefaultPlugins)
         .add_startup_system(init_game.exclusive_system())
         .add_system(determine_turn_group.system())
