@@ -36,20 +36,22 @@ pub trait Brain: Send + Sync {
     fn decide_action(
         &mut self,
         this_entity: Entity,
+        this_turn_group: TurnGroup,
         world: &mut ImmutableWorld,
     ) -> Option<Box<dyn Action>>;
 }
 
 impl<F> Brain for F
 where
-    F: (Fn(Entity, &mut ImmutableWorld) -> Option<Box<dyn Action>>) + Send + Sync,
+    F: (Fn(Entity, TurnGroup, &mut ImmutableWorld) -> Option<Box<dyn Action>>) + Send + Sync,
 {
     fn decide_action(
         &mut self,
         this_entity: Entity,
+        this_turn_group: TurnGroup,
         world: &mut ImmutableWorld,
     ) -> Option<Box<dyn Action>> {
-        (self)(this_entity, world)
+        (self)(this_entity, this_turn_group, world)
     }
 }
 
@@ -57,7 +59,6 @@ where
 pub enum TurnGroup {
     Player,
     Enemy,
-    Neutral,
 }
 
 /// If no more actors left for current turn group
@@ -73,8 +74,7 @@ pub fn determine_turn_group(mut turn_group: ResMut<TurnGroup>, mut actors: Query
     if actors_left_for_turn == 0 {
         *turn_group = match *turn_group {
             TurnGroup::Player => TurnGroup::Enemy,
-            TurnGroup::Enemy => TurnGroup::Neutral,
-            TurnGroup::Neutral => TurnGroup::Player,
+            TurnGroup::Enemy => TurnGroup::Player,
         };
 
         for mut actor in actors {
@@ -108,11 +108,14 @@ pub fn decide_next_action(world: &mut World) {
     for decision_attempt in 1..=3 {
         for actor_entity in actor_entities.iter().copied() {
             let mut actor = world.entity_mut(actor_entity).remove::<Actor>().unwrap();
+            let turn_group = actor.turn_group;
             let unlimited_decision_attempts = actor.unlimited_decision_attempts;
 
-            let action = actor
-                .brain
-                .decide_action(actor_entity, &mut ImmutableWorld::new(world));
+            let action = actor.brain.decide_action(
+                actor_entity,
+                turn_group,
+                &mut ImmutableWorld::new(world),
+            );
 
             if action.is_some() || (decision_attempt == 3 && !unlimited_decision_attempts) {
                 actor.ready_to_act = false;

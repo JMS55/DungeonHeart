@@ -30,7 +30,7 @@ fn main() {
         })
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.05)))
         .insert_resource(ActionStack::new())
-        .insert_resource(TurnGroup::Neutral)
+        .insert_resource(TurnGroup::Enemy)
         .insert_resource::<Vec<Room>>(Vec::new())
         .add_plugins(DefaultPlugins)
         .add_startup_system(init_game.exclusive_system())

@@ -43,6 +43,7 @@ impl Brain for PlayerBrain {
     fn decide_action(
         &mut self,
         this_entity: Entity,
+        _: TurnGroup,
         world: &mut ImmutableWorld,
     ) -> Option<Box<dyn Action>> {
         let move_up_action = MoveAction {

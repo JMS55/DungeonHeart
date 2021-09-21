@@ -25,6 +25,10 @@ impl SkeletonScout {
     }
 }
 
-fn print_entity_brain(entity: Entity, _: &mut ImmutableWorld) -> Option<Box<dyn Action>> {
+fn print_entity_brain(
+    entity: Entity,
+    _: TurnGroup,
+    _: &mut ImmutableWorld,
+) -> Option<Box<dyn Action>> {
     PrintEntityAction { entity }.to_brain_decision()
 }
